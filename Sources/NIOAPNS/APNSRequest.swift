@@ -8,15 +8,16 @@
 import NIO
 import NIOHTTP1
 import NIOHTTP2
+import Foundation
 
-public protocol APNSNotification: Codable {
-    var aps: APSPayload { get }
+public protocol APNSNotification {
+//    var aps: APSPayload { get }
+    func request() throws -> [String: Any]
+    func encode() throws -> Data
 }
-
-public struct BasicNotification: APNSNotification {
-    public var aps: APSPayload
-    public init(aps: APSPayload) {
-        self.aps = aps
+extension APNSNotification {
+    func encode() throws -> Data {
+        return try JSONSerialization.data(withJSONObject: request(), options: [])
     }
 }
 

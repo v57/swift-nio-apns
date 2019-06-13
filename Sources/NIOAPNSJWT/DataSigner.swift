@@ -15,9 +15,7 @@ public class DataSigner: APNSSigner {
         defer { CNIOBoringSSL_BIO_free(bio) }
 
         let nullTerminatedData = data + Data([0])
-        let res = nullTerminatedData.withUnsafeBytes { ptr in
-            return CNIOBoringSSL_BIO_puts(bio, ptr.baseAddress?.assumingMemoryBound(to: Int8.self))
-        }
+        let res = CNIOBoringSSL_BIO_puts(bio, raw(nullTerminatedData).convert())
         assert(res >= 0, "BIO_puts failed")
 
         if let pointer  = CNIOBoringSSL_PEM_read_bio_ECPrivateKey(bio!, nil, nil, nil) {
@@ -32,9 +30,7 @@ public class DataSigner: APNSSigner {
     }
 
     public func sign(digest: Data) throws -> Data  {
-        let sig = digest.withUnsafeBytes {
-            return CNIOBoringSSL_ECDSA_do_sign($0.baseAddress?.assumingMemoryBound(to: UInt8.self), digest.count, opaqueKey)
-        }
+        let sig = CNIOBoringSSL_ECDSA_do_sign(pointer(digest), digest.count, opaqueKey)
         defer { CNIOBoringSSL_ECDSA_SIG_free(sig) }
 
         var derEncodedSignature: UnsafeMutablePointer<UInt8>? = nil

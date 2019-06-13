@@ -7,6 +7,7 @@
 
 import Foundation
 import CNIOBoringSSL
+
 public class FileSigner: DataSigner {
     public convenience init(url: URL) throws {
         do {
